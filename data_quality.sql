@@ -101,7 +101,7 @@ SELECT
 FROM sellers
 
 #Orphaned Keys, Looking at 4 key columns identified above
-#Seeing if orders refrence customers that dont exist by refrencing both tables' customer Ids and counting where null
+#Seeing if orders refrence customers that dont exist by refrencing both tables customer Ids and counting where null
 
 SELECT 'orphanedCustomerId' As foreignKeys,
     COUNT(*) AS orphan_count
@@ -156,7 +156,6 @@ SELECT 'orphanedSellerId',
         FROM orders
     ),
     calendar AS (
-        -- generate_series is native in DuckDB and far simpler than a recursive CTE
         SELECT CAST(generate_series AS DATE) AS calanderDate
         FROM generate_series(
             (SELECT startDate FROM dateBounds),
@@ -171,29 +170,28 @@ SELECT 'orphanedSellerId',
         FROM orders
         GROUP BY CAST(order_purchase_timestamp AS DATE)
     ),
-    -- Islands trick: consecutive gap dates produce the same group key when you
-    -- subtract their row_number (as an integer day offset) from the date itself.
+
     gapGroups AS (
         SELECT
             c.calanderDate,
-            -- ROW_NUMBER() returns BIGINT in DuckDB; cast to INT before subtracting
+
             c.calanderDate - CAST(ROW_NUMBER() OVER (ORDER BY c.calanderDate) AS INTEGER)
                 AS gapGroup
         FROM calendar AS c
         LEFT JOIN dailyOrders AS d ON c.calanderDate = d.orderDate
         WHERE d.orderDate IS NULL   -- gap days only
     )
-    -- Collapse each contiguous gap into one row
+
     SELECT
-        MIN(calanderDate)  AS gapStart,
-        MAX(calanderDate)  AS gapEnd,
-        COUNT(*)       AS missingDays,
+        MIN(calanderDate) AS gapStart,
+        MAX(calanderDate) AS gapEnd,
+        COUNT(*) AS missingDays,
         CASE
             WHEN COUNT(*) = 1  THEN 'single day'
             WHEN COUNT(*) <= 3 THEN 'short gap (≤ 3 days)'
             WHEN COUNT(*) <= 7 THEN 'week-level gap'
             ELSE '!!!Extended gap!!! (> 7 days)'
-        END            AS severity
+        END AS severity
     FROM gapGroups
     GROUP BY gapGroup
     ORDER BY gapStart;
