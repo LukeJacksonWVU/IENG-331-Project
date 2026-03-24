@@ -1,6 +1,6 @@
 ##Quality Audit
 #Counting rows in each Table by selecting each column and counting every row using count(*)
-#Table Name undet tableName and Row Count under rowCount
+#Table Name under tableName and Row Count under rowCount
 
 SELECT 'categoryTranslation' AS tableName, COUNT(*) As rowCount FROM category_translation
     UNION ALL
@@ -23,6 +23,7 @@ SELECT 'sellers', COUNT(*) FROM sellers
 #Checking for Nulls in a seperate query
 #Identified orderID, CustomerID, ProductID, and SellerID as key columns
 #Some tables dont have every one of these key columns ,set to 0 if not in table
+#Used Round to divide Null by Total and mukltiply by 100
 
 SELECT
     'orders' AS tableName,
@@ -135,3 +136,12 @@ SELECT 'orphanedSellerId',
     LEFT JOIN sellers AS s
         ON oi.seller_id = s.seller_id
     WHERE s.seller_id IS NULL
+
+    #Investigating Date Ranges
+    #Looking at Order range to find number of days an order was placed and the total number of days
+    SELECT
+        MIN(order_purchase_timestamp) AS firstOrderDate,
+        MAX(order_purchase_timestamp) AS lastOrderDate,
+        COUNT(DISTINCT DATE(order_purchase_timestamp)) AS PurchaseDays,
+        CAST(MAX(order_purchase_timestamp) AS DATE) - CAST(MIN(order_purchase_timestamp) AS DATE) AS calendarDays
+    FROM orders;
