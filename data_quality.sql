@@ -1,4 +1,5 @@
-##Quality Audit
+###Quality Audit
+
 #Counting rows in each Table by selecting each column and counting every row using count(*)
 #Table Name under tableName and Row Count under rowCount
 
@@ -18,7 +19,7 @@ SELECT 'orders', COUNT(*) FROM orders
     UNION ALL
 SELECT 'products', COUNT(*) FROM products
     UNION ALL
-SELECT 'sellers', COUNT(*) FROM sellers
+SELECT 'sellers', COUNT(*) FROM sellers;
 
 #Checking for Nulls in a seperate query
 #Identified orderID, CustomerID, ProductID, and SellerID as key columns
@@ -98,7 +99,7 @@ SELECT
     0 AS nullOrderIdPercent,
     0 AS nullCustomerIdPercent,
     0 AS nullProductIdPercent,
-FROM sellers
+FROM sellers;
 
 #Orphaned Keys, Looking at 4 key columns identified above
 #Seeing if orders refrence customers that dont exist by refrencing both tables customer Ids and counting where null
@@ -135,7 +136,7 @@ SELECT 'orphanedSellerId',
     FROM order_items AS oi
     LEFT JOIN sellers AS s
         ON oi.seller_id = s.seller_id
-    WHERE s.seller_id IS NULL
+    WHERE s.seller_id IS NULL;
 
     #Investigating Date Ranges
     #Looking at Order range to find number of days an order was placed and the total number of days
@@ -197,3 +198,47 @@ SELECT 'orphanedSellerId',
         FROM gapGroups
         GROUP BY gapGroup
         ORDER BY gapStart;
+
+
+#Removing Duplicates
+#Doing it with products, orders, and customers
+
+WITH
+    duplicateOrders AS (
+        SELECT order_id, COUNT(*) AS cnt
+        FROM orders
+        GROUP BY order_id
+        HAVING COUNT(*) > 1),
+
+    duplicateCustomers AS (
+        SELECT customer_id, COUNT(*) AS cnt
+        FROM customers
+        GROUP BY customer_id
+        HAVING COUNT(*) > 1),
+
+    duplicateProducts AS (
+        SELECT product_id, COUNT(*) AS cnt
+        FROM products
+        GROUP BY product_id
+        HAVING COUNT(*) > 1)
+SELECT
+    'orders' AS tableName,
+    COUNT(*) AS duplicateKeys,
+    COALESCE(SUM(cnt), 0) AS totalDuplicateRows
+FROM duplicateOrders
+
+UNION ALL
+
+SELECT
+    'customers',
+    COUNT(*),
+    COALESCE(SUM(cnt), 0)
+FROM duplicateCustomers
+
+UNION ALL
+
+SELECT
+    'products',
+    COUNT(*),
+    COALESCE(SUM(cnt), 0)
+FROM duplicateProducts;
