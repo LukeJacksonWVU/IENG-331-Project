@@ -18,3 +18,5 @@ SELECT 'orders', COUNT(*) FROM orders
 SELECT 'products', COUNT(*) FROM products
     UNION ALL
 SELECT 'sellers', COUNT(*) FROM sellers
+
+#Checking for Nulls in a seperate query
