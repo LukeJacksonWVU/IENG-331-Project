@@ -98,3 +98,12 @@ SELECT 'sellers', COUNT(*) FROM sellers
         0 AS nullCustomerId,
         0 AS nullProductId,
     FROM sellers
+
+#Orphaned Keys, Looking at 4 key columns identified above
+#Seeing if orders refrence customers that dont exist by refrencing both tables' customer Ids and counting where null
+SELECT 'orphanedCustomerId' As foreignKeys,
+    COUNT(*) AS orphan_count
+    FROM orders o
+    LEFT JOIN customers c
+    ON o.customer_id = c.customer_id
+    WHERE c.customer_id IS NULL
