@@ -23,15 +23,78 @@ SELECT 'sellers', COUNT(*) FROM sellers
 #Checking for Nulls in a seperate query
 #Identified orderID, CustomerID, ProductID, and SellerID as key columns
 #Some tables dont have every one of these key columns ,set to 0 if not in table
-SELECT
+
+    SELECT
        'orders' AS tableName,
        COUNT(*) AS totalRows,
        SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END) AS nullOrderId,
-
        SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) AS nullCustomerId,
-
        0 AS nullProductId,
-
        0 AS nullSellerId,
+    FROM orders
 
-From orders
+    UNION ALL
+
+    SELECT
+        'orderItems',
+        COUNT(*) AS totalRows,
+        SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END),
+        SUM(CASE WHEN product_id IS NULL THEN 1 ELSE 0 END),
+        SUM(CASE WHEN seller_id IS NULL THEN 1 ELSE 0 END),
+        0 AS nullCustomerId,
+    FROM order_items
+
+    UNION ALL
+
+    SELECT
+        'orderPayments',
+        COUNT(*) AS total_rows,
+        SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END),
+        0 AS nullCustomerId,
+        0 AS nullProductId,
+        0 AS nullSellerId,
+    FROM order_payments
+
+    UNION ALL
+
+    SELECT
+        'orderReviews',
+        COUNT(*) AS total_rows,
+        SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END),
+        0 AS nullCustomerId,
+        0 AS nullProductId,
+        0 AS nullSellerId,
+    FROM order_reviews
+
+    UNION ALL
+
+    SELECT
+        'customers',
+        COUNT(*) AS total_rows,
+        SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END),
+        0 AS nullOrderId,
+        0 AS nullProductId,
+        0 AS nullSellerId,
+    FROM customers
+
+    UNION ALL
+
+    SELECT
+        'products',
+        COUNT(*) AS total_rows,
+        SUM(CASE WHEN product_id IS NULL THEN 1 ELSE 0 END),
+        0 AS nullOrderId,
+        0 AS nullCustomerId,
+        0 AS nullSellerId,
+    FROM products
+
+    UNION ALL
+
+    SELECT
+        'sellers',
+        COUNT(*) AS total_rows,
+        SUM(CASE WHEN seller_id IS NULL THEN 1 ELSE 0 END),
+        0 AS nullOrderId,
+        0 AS nullCustomerId,
+        0 AS nullProductId,
+    FROM sellers
