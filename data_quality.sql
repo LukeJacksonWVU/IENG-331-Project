@@ -150,48 +150,45 @@ SELECT 'orphanedSellerId',
     #Looking into days missing, this gets the start and end date
 
     WITH dateBounds AS (
-        SELECT
+            SELECT
             CAST(MIN(order_purchase_timestamp) AS DATE) AS startDate,
             CAST(MAX(order_purchase_timestamp) AS DATE) AS endDate
-        FROM orders
-    ),
-    calendar AS (
-        SELECT CAST(generate_series AS DATE) AS calanderDate
-        FROM generate_series(
+            FROM orders),
+
+        calendar AS (
+            SELECT CAST(generate_series AS DATE) AS calanderDate
+            FROM generate_series(
             (SELECT startDate FROM dateBounds),
             (SELECT endDate   FROM dateBounds),
-            INTERVAL '1 day'
-        )
-    ),
-    dailyOrders AS (
-        SELECT
+            INTERVAL '1 day')),
+
+
+        dailyOrders AS (
+            SELECT
             CAST(order_purchase_timestamp AS DATE) AS orderDate,
-            COUNT(*)                               AS orders
-        FROM orders
-        GROUP BY CAST(order_purchase_timestamp AS DATE)
-    ),
+            COUNT(*) AS orders
+            FROM orders
+            GROUP BY CAST(order_purchase_timestamp AS DATE)),
 
-    gapGroups AS (
-        SELECT
+        gapGroups AS (
+            SELECT
             c.calanderDate,
+            c.calanderDate - CAST(ROW_NUMBER() OVER (ORDER BY c.calanderDate) AS INTEGER) AS gapGroup
+            FROM calendar AS c
+            LEFT JOIN dailyOrders AS d ON c.calanderDate = d.orderDate
+            WHERE d.orderDate IS NULL)
 
-            c.calanderDate - CAST(ROW_NUMBER() OVER (ORDER BY c.calanderDate) AS INTEGER)
-                AS gapGroup
-        FROM calendar AS c
-        LEFT JOIN dailyOrders AS d ON c.calanderDate = d.orderDate
-        WHERE d.orderDate IS NULL   -- gap days only
-    )
 
-    SELECT
-        MIN(calanderDate) AS gapStart,
-        MAX(calanderDate) AS gapEnd,
-        COUNT(*) AS missingDays,
-        CASE
-            WHEN COUNT(*) = 1  THEN 'single day'
-            WHEN COUNT(*) <= 3 THEN 'short gap (≤ 3 days)'
-            WHEN COUNT(*) <= 7 THEN 'week-level gap'
-            ELSE '!!!Extended gap!!! (> 7 days)'
-        END AS severity
-    FROM gapGroups
-    GROUP BY gapGroup
-    ORDER BY gapStart;
+        SELECT
+            MIN(calanderDate) AS gapStart,
+            MAX(calanderDate) AS gapEnd,
+            COUNT(*) AS missingDays,
+            CASE
+                WHEN COUNT(*) = 1  THEN 'single day'
+                WHEN COUNT(*) <= 3 THEN 'short gap (≤ 3 days)'
+                WHEN COUNT(*) <= 7 THEN 'week-level gap'
+                ELSE '!!!Extended gap!!! (> 7 days)'
+            END AS Severity
+        FROM gapGroups
+        GROUP BY gapGroup
+        ORDER BY gapStart;
