@@ -139,9 +139,61 @@ SELECT 'orphanedSellerId',
 
     #Investigating Date Ranges
     #Looking at Order range to find number of days an order was placed and the total number of days
+    #Cast converts data type
     SELECT
         MIN(order_purchase_timestamp) AS firstOrderDate,
         MAX(order_purchase_timestamp) AS lastOrderDate,
         COUNT(DISTINCT DATE(order_purchase_timestamp)) AS PurchaseDays,
         CAST(MAX(order_purchase_timestamp) AS DATE) - CAST(MIN(order_purchase_timestamp) AS DATE) AS calendarDays
-    FROM orders;
+    FROM orders
+
+    #Looking into days missing, this gets the start and end date
+
+    WITH dateBounds AS (
+        SELECT
+            CAST(MIN(order_purchase_timestamp) AS DATE) AS startDate,
+            CAST(MAX(order_purchase_timestamp) AS DATE) AS endDate
+        FROM orders
+    ),
+    calendar AS (
+        -- generate_series is native in DuckDB and far simpler than a recursive CTE
+        SELECT CAST(generate_series AS DATE) AS calanderDate
+        FROM generate_series(
+            (SELECT startDate FROM dateBounds),
+            (SELECT endDate   FROM dateBounds),
+            INTERVAL '1 day'
+        )
+    ),
+    dailyOrders AS (
+        SELECT
+            CAST(order_purchase_timestamp AS DATE) AS orderDate,
+            COUNT(*)                               AS orders
+        FROM orders
+        GROUP BY CAST(order_purchase_timestamp AS DATE)
+    ),
+    -- Islands trick: consecutive gap dates produce the same group key when you
+    -- subtract their row_number (as an integer day offset) from the date itself.
+    gapGroups AS (
+        SELECT
+            c.calanderDate,
+            -- ROW_NUMBER() returns BIGINT in DuckDB; cast to INT before subtracting
+            c.calanderDate - CAST(ROW_NUMBER() OVER (ORDER BY c.calanderDate) AS INTEGER)
+                AS gapGroup
+        FROM calendar AS c
+        LEFT JOIN dailyOrders AS d ON c.calanderDate = d.orderDate
+        WHERE d.orderDate IS NULL   -- gap days only
+    )
+    -- Collapse each contiguous gap into one row
+    SELECT
+        MIN(calanderDate)  AS gapStart,
+        MAX(calanderDate)  AS gapEnd,
+        COUNT(*)       AS missingDays,
+        CASE
+            WHEN COUNT(*) = 1  THEN 'single day'
+            WHEN COUNT(*) <= 3 THEN 'short gap (≤ 3 days)'
+            WHEN COUNT(*) <= 7 THEN 'week-level gap'
+            ELSE '!!!Extended gap!!! (> 7 days)'
+        END            AS severity
+    FROM gapGroups
+    GROUP BY gapGroup
+    ORDER BY gapStart;
