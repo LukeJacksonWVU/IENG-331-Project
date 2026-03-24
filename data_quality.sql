@@ -24,80 +24,80 @@ SELECT 'sellers', COUNT(*) FROM sellers
 #Identified orderID, CustomerID, ProductID, and SellerID as key columns
 #Some tables dont have every one of these key columns ,set to 0 if not in table
 
-    SELECT
-       'orders' AS tableName,
-       COUNT(*) AS totalRows,
-       SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END) AS nullOrderId,
-       SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) AS nullCustomerId,
-       0 AS nullProductId,
-       0 AS nullSellerId,
-    FROM orders
+SELECT
+    'orders' AS tableName,
+    COUNT(*) AS totalRows,
+    ROUND(100.0 * SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2) AS nullCustomerIdPercent,
+    ROUND(100.0 * SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2) AS nullOrderIdPercent,
+    0 AS nullProductIdPercent,
+    0 AS nullSellerIdPercent,
+From orders
 
     UNION ALL
 
-    SELECT
-        'orderItems',
-        COUNT(*) AS totalRows,
-        SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END),
-        SUM(CASE WHEN product_id IS NULL THEN 1 ELSE 0 END),
-        SUM(CASE WHEN seller_id IS NULL THEN 1 ELSE 0 END),
-        0 AS nullCustomerId,
-    FROM order_items
+SELECT
+    'orderItems',
+    COUNT(*) AS totalRows,
+    ROUND(100.0 * SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2),
+    ROUND(100.0 * SUM(CASE WHEN product_id IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2),
+    ROUND(100.0 * SUM(CASE WHEN seller_id IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2),
+    0 AS nullCustomerIdPercent,
+FROM order_items
 
     UNION ALL
 
-    SELECT
-        'orderPayments',
-        COUNT(*) AS total_rows,
-        SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END),
-        0 AS nullCustomerId,
-        0 AS nullProductId,
-        0 AS nullSellerId,
-    FROM order_payments
+SELECT
+    'orderPayments',
+    COUNT(*) AS total_rows,
+    ROUND(100.0 * SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2),
+    0 AS nullCustomerIdPercent,
+    0 AS nullProductIdPercent,
+    0 AS nullSellerIdPercent,
+FROM order_payments
 
     UNION ALL
 
-    SELECT
-        'orderReviews',
-        COUNT(*) AS total_rows,
-        SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END),
-        0 AS nullCustomerId,
-        0 AS nullProductId,
-        0 AS nullSellerId,
-    FROM order_reviews
+SELECT
+    'orderReviews',
+    COUNT(*) AS total_rows,
+    ROUND(100.0 * SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2),
+    0 AS nullCustomerIdPercent,
+    0 AS nullProductIdPercent,
+    0 AS nullSellerIdPercent,
+FROM order_reviews
 
     UNION ALL
 
-    SELECT
-        'customers',
-        COUNT(*) AS total_rows,
-        SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END),
-        0 AS nullOrderId,
-        0 AS nullProductId,
-        0 AS nullSellerId,
-    FROM customers
+SELECT
+    'customers',
+    COUNT(*) AS total_rows,
+    ROUND(100.0 * SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2),
+    0 AS nullOrderIdPercent,
+    0 AS nullProductIdPercent,
+    0 AS nullSellerIdPercent,
+FROM customers
 
     UNION ALL
 
-    SELECT
-        'products',
-        COUNT(*) AS total_rows,
-        SUM(CASE WHEN product_id IS NULL THEN 1 ELSE 0 END),
-        0 AS nullOrderId,
-        0 AS nullCustomerId,
-        0 AS nullSellerId,
-    FROM products
+SELECT
+    'products',
+    COUNT(*) AS total_rows,
+    ROUND(100.0 * SUM(CASE WHEN product_id IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2),
+    0 AS nullOrderIdPercent,
+    0 AS nullCustomerIdPercent,
+    0 AS nullSellerIdPercent,
+FROM products
 
     UNION ALL
 
-    SELECT
-        'sellers',
-        COUNT(*) AS total_rows,
-        SUM(CASE WHEN seller_id IS NULL THEN 1 ELSE 0 END),
-        0 AS nullOrderId,
-        0 AS nullCustomerId,
-        0 AS nullProductId,
-    FROM sellers
+SELECT
+    'sellers',
+    COUNT(*) AS total_rows,
+    ROUND(100.0 * SUM(CASE WHEN seller_id IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2),
+    0 AS nullOrderIdPercent,
+    0 AS nullCustomerIdPercent,
+    0 AS nullProductIdPercent,
+FROM sellers
 
 #Orphaned Keys, Looking at 4 key columns identified above
 #Seeing if orders refrence customers that dont exist by refrencing both tables' customer Ids and counting where null
