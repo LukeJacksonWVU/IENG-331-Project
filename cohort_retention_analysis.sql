@@ -69,3 +69,16 @@ cohort_activity AS (
         ON fo.customer_unique = so.customer_unique
 )
 --calculations; time between visits if returning (30, 60, and 90 day intervals); left join gets rid of non-return customers
+SELECT
+    cohort_month,
+    COUNT(*)                                         AS cohort_size,
+    SUM(retained_30d)                                AS returned_30d,
+    ROUND(SUM(retained_30d) * 100.0 / COUNT(*), 2)  AS retention_rate_30d,
+    SUM(retained_60d)                                AS returned_60d,
+    ROUND(SUM(retained_60d) * 100.0 / COUNT(*), 2)  AS retention_rate_60,
+    SUM(retained_90d)                                AS returned_90d,
+    ROUND(SUM(retained_90d) * 100.0 / COUNT(*), 2)  AS retention_rate_90
+FROM cohort_activity
+GROUP BY cohort_month
+ORDER BY cohort_month ASC
+--count tells how many in a month; calculates a retention rate (rounded) by summing the # retained and dividing by total
