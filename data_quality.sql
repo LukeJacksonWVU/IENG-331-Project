@@ -1,7 +1,7 @@
-###Quality Audit
+--Quality Audit--
 
-#Counting rows in each Table by selecting each column and counting every row using count(*)
-#Table Name under tableName and Row Count under rowCount
+--Counting rows in each Table by selecting each column and counting every row using count(*)--
+--Table Name under tableName and Row Count under rowCount--
 
 SELECT 'categoryTranslation' AS tableName, COUNT(*) As rowCount FROM category_translation
     UNION ALL
@@ -21,10 +21,10 @@ SELECT 'products', COUNT(*) FROM products
     UNION ALL
 SELECT 'sellers', COUNT(*) FROM sellers;
 
-#Checking for Nulls in a seperate query
-#Identified orderID, CustomerID, ProductID, and SellerID as key columns
-#Some tables dont have every one of these key columns ,set to 0 if not in table
-#Used Round to divide Null by Total and mukltiply by 100
+--Checking for Nulls in a seperate query--
+--Identified orderID, CustomerID, ProductID, and SellerID as key columns--
+--Some tables dont have every one of these key columns ,set to 0 if not in table--
+--Used Round to divide Null by Total and mukltiply by 100--
 
 SELECT
     'orders' AS tableName,
@@ -101,8 +101,8 @@ SELECT
     0 AS nullProductIdPercent,
 FROM sellers;
 
-#Orphaned Keys, Looking at 4 key columns identified above
-#Seeing if orders refrence customers that dont exist by refrencing both tables customer Ids and counting where null
+--Orphaned Keys, Looking at 4 key columns identified above--
+--Seeing if orders refrence customers that dont exist by refrencing both tables customer Ids and counting where null--
 
 SELECT 'orphanedCustomerId' As foreignKeys,
     COUNT(*) AS orphan_count
@@ -138,9 +138,9 @@ SELECT 'orphanedSellerId',
         ON oi.seller_id = s.seller_id
     WHERE s.seller_id IS NULL;
 
-    #Investigating Date Ranges
-    #Looking at Order range to find number of days an order was placed and the total number of days
-    #Cast converts data type
+--Investigating Date Ranges--
+--Looking at Order range to find number of days an order was placed and the total number of days--
+--Cast converts data type--
     SELECT
         MIN(order_purchase_timestamp) AS firstOrderDate,
         MAX(order_purchase_timestamp) AS lastOrderDate,
@@ -148,32 +148,32 @@ SELECT 'orphanedSellerId',
         CAST(MAX(order_purchase_timestamp) AS DATE) - CAST(MIN(order_purchase_timestamp) AS DATE) AS calendarDays
     FROM orders
 
-    #Looking into days missing, this gets the start and end date
-    #Setting the date bounds by using the max and min order date from the orders table
+--Looking into days missing, this gets the start and end date--
+--Setting the date bounds by using the max and min order date from the orders table--
     WITH dateBounds AS (
             SELECT
             CAST(MIN(order_purchase_timestamp) AS DATE) AS startDate,
             CAST(MAX(order_purchase_timestamp) AS DATE) AS endDate
             FROM orders),
-    #Generate_series function built into duckDB with an interval of 1 day with start and end from previous section
-    #List every calander day (Youtube video showed me how to do this)
+--Generate_series function built into duckDB with an interval of 1 day with start and end from previous section--
+--List every calander day (Youtube video showed me how to do this)--
         calendar AS (
             SELECT CAST(generate_series AS DATE) AS calanderDate
             FROM generate_series(
             (SELECT startDate FROM dateBounds),
             (SELECT endDate   FROM dateBounds),
             INTERVAL '1 day')),
-    #Counts where orders were placed and stores it as DailyOrders
+--Counts where orders were placed and stores it as DailyOrders--
         dailyOrders AS (
             SELECT
             CAST(order_purchase_timestamp AS DATE) AS orderDate,
             COUNT(*) AS orders
             FROM orders
             GROUP BY CAST(order_purchase_timestamp AS DATE)),
-    #Assigns number to gap days in order where there is no value. This is a way to group the gaps
-    #Subtracts the date by the number, you end up with an arbitrary date but it is the same date
-    #This creates a group
-    #This is where AI helped the most and something I couldnt figure out on my own
+--Assigns number to gap days in order where there is no value. This is a way to group the gaps--
+--Subtracts the date by the number, you end up with an arbitrary date but it is the same date--
+--This creates a group--
+--This is where AI helped the most and something I couldnt figure out on my own--
         gapGroups AS (
             SELECT
             c.calanderDate,
@@ -182,9 +182,10 @@ SELECT 'orphanedSellerId',
             LEFT JOIN dailyOrders AS d ON c.calanderDate = d.orderDate
             WHERE d.orderDate IS NULL)
 
-    #Getting the beginning and end of the gap from the GAPGROUP, counting everything as the missing days
-    #Using a case when to catagorise the gaps
-    #Ordering by the gap start date
+--Getting the beginning and end of the gap from the GAPGROUP, counting everything as the missing days--
+--Using a case when to catagorise the gaps--
+--Ordering by the gap start date--
+
         SELECT
             MIN(calanderDate) AS gapStart,
             MAX(calanderDate) AS gapEnd,
@@ -200,8 +201,8 @@ SELECT 'orphanedSellerId',
         ORDER BY gapStart;
 
 
-#Removing Duplicates
-#Doing it with products, orders, and customers
+--Removing Duplicates--
+--Doing it with products, orders, and customers--
 
 WITH
     duplicateOrders AS (
