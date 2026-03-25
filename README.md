@@ -45,3 +45,17 @@ Since delivery estimates are part of the database, a true or false query can det
 Seller average review per order is then caluculated. While an order can have multiple items from the same seller, in theese cases the seller will only be accounted for once. In the same vein, for orders containing multiple items from the same seller, cancellations will only be counted once against a seller.
 Coalescing the factors calcualted above into metrics for the scorecard is the next step. These metrics are then joined the the seller ID table.
 The rating is then calcualted and rounded into one composite score.
+
+#Delivery Time Analysis
+Firstly, a few important pieces must be establsihed to conduct good analysis.
+ actual_days: the number of days from the order time stamp until customer delivery
+ estimated_days: the number of days ESTIMATED between the order time stamp and customer delivery
+ days_early_late: the difference, both early and late, between actual and estimated days.
+Further, an average of the above metrics shoudl be taken for each corridor, A corridor is the path between the seller state and the customer state. 
+Then the tables for orders, customers, order items, and sellers are grouped together. A sum of on time deliveries (defined as when the actual delivery date is earlier or equal to the estimated delivery date) and a sum of late deliveries (when actual date exceeds the estimate).
+Geography is the biggest, and most obvious, factor in delivery. However, it is not always clear what corridors are most effecient at a glance, especially when one corridor is compared to another that is similar in distance and geography.
+Metrics can be created to give a quantitative undertanding of the different corridors.
+Two metrics are created:
+ on_time_rate_pct is the number of on time deliveries divided by the total number of deliveries
+ late_rate_pct is the number of late deliveries divided by the total number of deliveries.
+Each corridor can be ranked by its average days early and late, calculated earlier, with the best corridor at the top.
