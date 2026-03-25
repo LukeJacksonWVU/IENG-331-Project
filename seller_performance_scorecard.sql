@@ -76,3 +76,32 @@ combined_metrics AS (
     LEFT JOIN seller_cancellations sc ON s.seller_id = sc.seller_id
 ),
 --rates the seller--had to do a little googling for this bc it caused a little block, but the solution was left joins--essentially attaches the metrics to the sellers table
+normalized AS (
+    SELECT
+        seller_id,
+        seller_city,
+        seller_state,
+        total_orders,
+        total_revenue,
+        on_time_rate,
+        avg_review_score,
+        cancellation_rate,
+
+        (total_revenue - MIN(total_revenue) OVER ())
+            / (MAX(total_revenue) OVER () - MIN(total_revenue) OVER ())
+                                                AS norm_revenue,
+
+        (on_time_rate - MIN(on_time_rate) OVER ())
+            / (MAX(on_time_rate) OVER () - MIN(on_time_rate) OVER ())
+                                                AS norm_on_time,
+
+        (avg_review_score - MIN(avg_review_score) OVER ())
+            / (MAX(avg_review_score) OVER () - MIN(avg_review_score) OVER ())
+                                                AS norm_review,
+
+        1 - (cancellation_rate - MIN(cancellation_rate) OVER ())
+            / (MAX(cancellation_rate) OVER () - MIN(cancellation_rate) OVER ())
+                                                AS norm_cancellation
+    FROM combined_metrics
+)
+ --same formula for the four metrics-uses these to assign score, cancellation rate is diff so a 0 cancellation rate is received as good
