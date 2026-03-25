@@ -105,3 +105,32 @@ normalized AS (
     FROM combined_metrics
 )
  --same formula for the four metrics-uses these to assign score, cancellation rate is diff so a 0 cancellation rate is received as good
+ SELECT
+     seller_id,
+     seller_city,
+     seller_state,
+     total_orders,
+     total_revenue,
+     on_time_rate        AS on_time_rate_pct,
+     avg_review_score,
+     cancellation_rate   AS cancellation_rate_pct,
+
+     ROUND(
+         (norm_revenue      * 0.30) +
+         (norm_on_time      * 0.30) +
+         (norm_review       * 0.25) +
+         (norm_cancellation * 0.15),
+     4) AS composite_score,
+  --the composite score
+     DENSE_RANK() OVER (
+         ORDER BY
+             (norm_revenue      * 0.30) +
+             (norm_on_time      * 0.30) +
+             (norm_review       * 0.25) +
+             (norm_cancellation * 0.15)
+         DESC
+     ) AS seller_rank
+  --rank them by comp score
+ FROM normalized
+ ORDER BY seller_rank ASC;
+ --rounds the scores,
