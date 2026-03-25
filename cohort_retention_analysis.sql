@@ -40,3 +40,32 @@ subsequent_orders AS (
     GROUP BY rc.customer_unique
 ),
 --finds repeat customers and shows the most recent return (regardless of #, i.e., 3 or 4 times return)
+cohort_activity AS (
+    SELECT
+        fo.cohort_month,
+        fo.customer_unique,
+        datediff('day', fo.first_order_ts, so.second_order_ts) AS days_to_return,
+
+        CASE
+            WHEN so.second_order_ts IS NOT NULL
+             AND datediff('day', fo.first_order_ts, so.second_order_ts) <= 30
+            THEN 1 ELSE 0
+        END AS retained_30d,
+
+        CASE
+            WHEN so.second_order_ts IS NOT NULL
+             AND datediff('day', fo.first_order_ts, so.second_order_ts) <= 60
+            THEN 1 ELSE 0
+        END AS retained_60d,
+
+        CASE
+            WHEN so.second_order_ts IS NOT NULL
+             AND datediff('day', fo.first_order_ts, so.second_order_ts) <= 90
+            THEN 1 ELSE 0
+        END AS retained_90d
+
+    FROM first_orders fo
+    LEFT JOIN subsequent_orders so
+        ON fo.customer_unique = so.customer_unique
+)
+--calculations; time between visits if returning (30, 60, and 90 day intervals); left join gets rid of non-return customers
