@@ -38,4 +38,10 @@ Product revenue does not exist in the database naturally. It must be defined. In
 Grand totals, running totals, and percentages may be calculated next. This is the meat of the analysis, but also quite straightforward. When the grand total of all revenue, the percentage contribution to that total for each product, and the running total (sorted in descending order in the table for readability) are calculated, it is as simple as running a few WHEN statements that assign them a tier at certain thresholds.
 Lastly, the products are joined into categories and sorted in order, with Tier A at the top of the lost.
 
->>>>>>> 04898da9fd4857913ca21b26c8d4dd87d4938c3f
+#Seller Performance Scorecard
+A variety of sellers are featured on the e-commerce platform, and they can be ranked according to a composite score. The factors in this composite score include revenue, on-time delivery rate, rate of return/cancellation, and average customer reviews.
+These factors can each be derived from the olist dataset. Revenue of a seller can be calculated in a similar fashion as the Cohort Analysis: price + freight value anda  count of distinct order id's. Then, this data is grouped by seller ID. Cancellation are ignored in this part.
+Since delivery estimates are part of the database, a true or false query can determine if the seller delivered on time or not. If the actual delivery is less than or equal to the estimate, they are on time. Otherwise, they are late. Orders with null delivery values (eg. those that have been cancelled), they are excluded.
+Seller average review per order is then caluculated. While an order can have multiple items from the same seller, in theese cases the seller will only be accounted for once. In the same vein, for orders containing multiple items from the same seller, cancellations will only be counted once against a seller.
+Coalescing the factors calcualted above into metrics for the scorecard is the next step. These metrics are then joined the the seller ID table.
+The rating is then calcualted and rounded into one composite score.
