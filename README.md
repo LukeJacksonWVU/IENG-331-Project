@@ -17,4 +17,4 @@ Identified key columns as the "ID" Columns that are refrenced in multiple tables
 
 #DATE RANGE, Q4: defines the range of dates in which purchases were made. Drawing data from the orders table, creates three variables: firstOrderDate, lastOrderDate, PurchaseDays. This is the earliest (MIN) date for which there is a purhcase timestamp, the latest (MAX) date for which there is a purchase tiem stamp, and a count of every distinct day on which a purchase was made, respectively. Used CAST to change data type to calendar days.
 
-#DATE GAPS, Q5:
+#DATE GAPS, Q5: finds beginning and end of purchase history, the MIN and MAX dates. These are the Date Bounds. Used a built in duckDB function, "generate_series", to list each calendar day one day at a time.
