@@ -174,6 +174,7 @@ SELECT 'orphanedSellerId',
 --Subtracts the date by the number, you end up with an arbitrary date but it is the same date--
 --This creates a group--
 --This is where AI helped the most and something I couldnt figure out on my own--
+--Explained much better in the README after farther research--
         gapGroups AS (
             SELECT
             c.calanderDate,
