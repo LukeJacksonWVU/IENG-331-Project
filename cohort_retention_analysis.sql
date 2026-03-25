@@ -29,3 +29,14 @@ first_orders AS (
     WHERE rn = 1
 ),
 --find each customer's first order; sort by purchase date and keep the first (rn=1);
+subsequent_orders AS (
+    SELECT
+        rc.customer_unique,
+        MIN(rc.order_purchase_timestamp)    AS second_order_ts
+    FROM resolved_customers rc
+    JOIN first_orders fo
+        ON  rc.customer_unique = fo.customer_unique
+        AND rc.order_id            != fo.first_order_id
+    GROUP BY rc.customer_unique
+),
+--finds repeat customers and shows the most recent return (regardless of #, i.e., 3 or 4 times return)
