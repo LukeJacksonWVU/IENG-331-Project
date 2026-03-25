@@ -24,7 +24,7 @@ Identified key columns as the "ID" Columns that are refrenced in multiple tables
 ##Particular Business Applications Through SQL Queries
 Four different business applications of the data queried from the database are presented in their own SQL files. A Cohort Retention Analysis, Seller Performance Scorecard, ABC Inventory Classification, and a Delivery Time Analysis.
 
-#Cohort Retention Analysis: Cohorts of customers are created by their first purchase month, and then the percentage of each cohort that placed a second order within 30, 60, or 90 days is calculated. This provides a look into customer retnetion.
+#Cohort Retention Analysis: Cohorts of customers are created by their first purchase month, and then the percentage of each cohort that placed a second order within 30, 60, or 90 days is calculated. This provides a look into customer retention.
 
 First, the CTE "customer_unique" is created by concatenating the city and the corresponding zip code from customer orders. This is important for elimanting duplicate IDs. Customers are then paired with their first order, and then sorted by purchase date. All orders are analyzed for thoroughness, but only the earliest is needed. Customers making their first order in the same month are in the same cohort.
 Then, the data is queried to find repeat customers. The most recent orders by returning customers is gathered into a CTE called cohort_activity.
