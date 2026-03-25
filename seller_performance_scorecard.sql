@@ -43,3 +43,19 @@ seller_reviews AS (
     GROUP BY oi_dedup.seller_id
 ),
 --order can have multiple items from the same seller, gets rid of that, so seller is accounted for once
+seller_cancellations AS (
+    SELECT
+        oi.seller_id,
+        ROUND(
+            SUM(
+                CASE
+                    WHEN o.order_status IN ('canceled', 'unavailable')
+                    THEN 1 ELSE 0
+                END
+            ) * 100.0 / COUNT(DISTINCT o.order_id),
+        2) AS cancellation_rate_pct
+    FROM olist.main.order_items oi
+    JOIN olist.main.orders o ON oi.order_id = o.order_id
+    GROUP BY oi.seller_id
+),
+--same idea as previous section
