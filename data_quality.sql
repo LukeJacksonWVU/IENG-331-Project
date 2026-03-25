@@ -211,9 +211,9 @@ WITH
         HAVING COUNT(*) > 1),
 
     duplicateCustomers AS (
-        SELECT customer_id, COUNT(*) AS cnt
+        SELECT customer_unique_id, COUNT(*) AS cnt
         FROM customers
-        GROUP BY customer_id
+        GROUP BY customer_unique_id
         HAVING COUNT(*) > 1),
 
     duplicateProducts AS (
