@@ -28,3 +28,10 @@ First, the CTE "customer_unique" is created by concatenating the city and the co
 Then, the data is queried to find repeat customers. The most recent orders by returning customers is gathered into a CTE called cohort_activity.
 Using the cohort_month and unique customers groups, the time between orders for returning customers (one-time customers are excluded) is calculated.
 A percentage rate is then calculated for each cohort, from cohort_activity, for 30, 60, and 90 day intervals.
+
+#ABC Inventory Classification
+Understanding what products are real, consistent, money makers is critical to running a marketplace. Conducting an analysis using SQL, revenues for products are ranked into three tiers: "A" tier comprises 80% of total revenue, "B" tier comprises 15% of total revenue, and "C" tier comprises the final 5% of total revenue.
+Product revenue does not exist in the database naturally. It must be defined. In this analysis, it is defined as price + freight value, pulling data from orders that are not cancelled or unavailable. This is the total revenue for a product.
+Grand totals, running totals, and percentages may be calculated next. This is the meat of the analysis, but also quite straightforward. When the grand total of all revenue, the percentage contribution to that total for each product, and the running total (sorted in descending order in the table for readability) are calculated, it is as simple as running a few WHEN statements that assign them a tier at certain thresholds.
+Lastly, the products are joined into categories and sorted in order, with Tier A at the top of the lost.
+
