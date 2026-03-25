@@ -59,3 +59,20 @@ seller_cancellations AS (
     GROUP BY oi.seller_id
 ),
 --same idea as previous section
+combined_metrics AS (
+    SELECT
+        s.seller_id,
+        s.seller_city,
+        s.seller_state,
+        COALESCE(sr.total_orders,          0) AS total_orders,
+        COALESCE(sr.total_revenue,         0) AS total_revenue,
+        COALESCE(sd.on_time_rate_pct,      0) AS on_time_rate,
+        COALESCE(sv.avg_review_score,      0) AS avg_review_score,
+        COALESCE(sc.cancellation_rate_pct, 0) AS cancellation_rate
+    FROM olist.main.sellers s
+    LEFT JOIN seller_revenue       sr ON s.seller_id = sr.seller_id
+    LEFT JOIN seller_delivery      sd ON s.seller_id = sd.seller_id
+    LEFT JOIN seller_reviews       sv ON s.seller_id = sv.seller_id
+    LEFT JOIN seller_cancellations sc ON s.seller_id = sc.seller_id
+),
+--rates the seller--had to do a little googling for this bc it caused a little block, but the solution was left joins--essentially attaches the metrics to the sellers table
