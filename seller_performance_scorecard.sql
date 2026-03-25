@@ -31,3 +31,15 @@ seller_delivery AS (
     GROUP BY oi.seller_id
 ),
 --gets rid of null
+seller_reviews AS (
+    SELECT
+        oi_dedup.seller_id,
+        ROUND(AVG(r.review_score), 2) AS avg_review_score
+    FROM (
+        SELECT DISTINCT seller_id, order_id
+        FROM olist.main.order_items
+    ) oi_dedup
+    JOIN olist.main.order_reviews r ON oi_dedup.order_id = r.order_id
+    GROUP BY oi_dedup.seller_id
+),
+--order can have multiple items from the same seller, gets rid of that, so seller is accounted for once
